@@ -18,6 +18,12 @@
                redirect('change_password.php',false);
              }
 
+            $policy_error = oswa_password_policy_error($_POST['new-password']);
+            if($policy_error){
+              $session->msg('d', $policy_error);
+              redirect('change_password.php',false);
+            }
+
             $id = (int)$_POST['id'];
             $new = $db->escape(oswa_password_hash($_POST['new-password']));
             $sql = "UPDATE users SET password ='{$new}' WHERE id='{$db->escape($id)}'";

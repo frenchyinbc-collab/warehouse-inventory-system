@@ -12,6 +12,11 @@
    validate_fields($req_fields);
 
    if(empty($errors)){
+       $policy_error = oswa_password_policy_error($_POST['password']);
+       if($policy_error){
+         $session->msg('d', $policy_error);
+         redirect('add_user.php', false);
+       }
            $name   = remove_junk($db->escape($_POST['full-name']));
        $username   = remove_junk($db->escape($_POST['username']));
        $password   = remove_junk($db->escape($_POST['password']));

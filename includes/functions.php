@@ -26,6 +26,18 @@ function oswa_password_verify($plain, $stored){
 function oswa_password_needs_upgrade($stored){
   return oswa_password_is_legacy($stored) || password_needs_rehash($stored, PASSWORD_DEFAULT);
 }
+ /*--------------------------------------------------------------*/
+ /* Password policy: returns an error message, or null when the
+ /* password is acceptable.
+ /*--------------------------------------------------------------*/
+defined('OSWA_MIN_PASSWORD_LENGTH') || define('OSWA_MIN_PASSWORD_LENGTH', 8);
+function oswa_password_policy_error($plain){
+  $length = function_exists('mb_strlen') ? mb_strlen((string)$plain) : strlen((string)$plain);
+  if($length < OSWA_MIN_PASSWORD_LENGTH){
+    return 'Password must be at least '.OSWA_MIN_PASSWORD_LENGTH.' characters long.';
+  }
+  return null;
+}
 
  /*--------------------------------------------------------------*/
  /* Function for Remove escapes special

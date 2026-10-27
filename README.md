@@ -27,13 +27,11 @@ If you find any bug, and a fix for that bug, please leave a comment on the githu
 
 4. Change all Folder permission inside uploads folder either add them to group call `www` if available or `777`.
 
-5. Then loging by typing **username** and **password**:
+5. Create the first administrator (there are no default accounts any more; the password must be at least 8 characters and is read from the environment, not the command line):
 
+   `OSWA_NEW_PASSWORD='choose a long password' php bin/create_user.php admin "Your Name" 1`
 
-   Administrator        | Special User           | Default User
-   ---------------------| -----------------------| -------------------
-   **Username** : admin | **Username** : special | **Username** : user
-   **Password** : admin | **Password** : special | **Password** : user
+   Levels: 1 = admin, 2 = special, 3 = user. Then log in with that **username** and **password**. Other users can be added from the "Add user" page.
 
 6. Good luck!  
 

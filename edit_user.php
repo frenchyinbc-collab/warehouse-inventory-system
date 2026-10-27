@@ -45,6 +45,11 @@ if(isset($_POST['update-pass'])) {
   $req_fields = array('password');
   validate_fields($req_fields);
   if(empty($errors)){
+     $policy_error = oswa_password_policy_error($_POST['password']);
+     if($policy_error){
+       $session->msg('d', $policy_error);
+       redirect('edit_user.php?id='.(int)$e_user['id'], false);
+     }
            $id = (int)$e_user['id'];
      $password = remove_junk($db->escape($_POST['password']));
      $h_pass   = $db->escape(oswa_password_hash($password));
