@@ -1,4 +1,10 @@
 <?php
+ // Session cookie: not readable by scripts (HttpOnly), not sent on cross-site requests (SameSite),
+ // and HTTPS-only when the site is served over HTTPS.
+ $oswa_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+ session_set_cookie_params(array('lifetime' => 0, 'path' => '/', 'secure' => $oswa_https, 'httponly' => true, 'samesite' => 'Lax'));
+ ini_set('session.use_strict_mode', '1');
  session_start();
 
 class Session {
@@ -15,6 +21,7 @@ class Session {
     return $this->user_is_logged_in;
   }
   public function login($user_id){
+    session_regenerate_id(true); // a new id at login: a pre-login id cannot be reused (session fixation)
     $_SESSION['user_id'] = $user_id;
   }
   private function userLoginSetup()
@@ -29,6 +36,7 @@ class Session {
   }
   public function logout(){
     unset($_SESSION['user_id']);
+    session_regenerate_id(true);
   }
 
   public function msg($type ='', $msg =''){
