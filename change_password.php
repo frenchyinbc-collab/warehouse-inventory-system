@@ -48,6 +48,7 @@
      </div>
      <?php echo display_msg($msg); ?>
       <form method="post" action="change_password.php" class="clearfix">
+<?php echo csrf_field(); ?>
         <div class="form-group">
               <label for="newPassword" class="control-label">New password</label>
               <input type="password" class="form-control" name="new-password" placeholder="New password">

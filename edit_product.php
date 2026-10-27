@@ -66,7 +66,8 @@ if(!$product){
         </div>
         <div class="panel-body">
          <div class="col-md-7">
-           <form method="post" action="edit_product.php?id=<?php echo (int)$product['id'] ?>">
+           <form method="post" action="edit_product.php?id=<?php echo (int)$product['id'] ?>
+<?php echo csrf_field(); ?>">
               <div class="form-group">
                 <div class="input-group">
                   <span class="input-group-addon">

@@ -53,6 +53,7 @@
       <div class="panel-body">
         <div class="col-md-6">
           <form method="post" action="add_user.php">
+<?php echo csrf_field(); ?>
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" class="form-control" name="full-name" placeholder="Full Name">

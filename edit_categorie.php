@@ -48,7 +48,8 @@ if(isset($_POST['edit_cat'])){
         </strong>
        </div>
        <div class="panel-body">
-         <form method="post" action="edit_categorie.php?id=<?php echo (int)$categorie['id'];?>">
+         <form method="post" action="edit_categorie.php?id=<?php echo (int)$categorie['id'];?>
+<?php echo csrf_field(); ?>">
            <div class="form-group">
                <input type="text" class="form-control" name="categorie-name" value="<?php echo remove_junk(ucfirst($categorie['name']));?>">
            </div>

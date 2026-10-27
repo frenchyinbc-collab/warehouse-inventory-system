@@ -46,7 +46,8 @@
        <h3>Edit Group</h3>
      </div>
      <?php echo display_msg($msg); ?>
-      <form method="post" action="edit_group.php?id=<?php echo (int)$e_group['id'];?>" class="clearfix">
+      <form method="post" action="edit_group.php?id=<?php echo (int)$e_group['id'];?>
+<?php echo csrf_field(); ?>" class="clearfix">
         <div class="form-group">
               <label for="name" class="control-label">Group Name</label>
               <input type="name" class="form-control" name="group-name" value="<?php echo remove_junk(ucwords($e_group['group_name'])); ?>">

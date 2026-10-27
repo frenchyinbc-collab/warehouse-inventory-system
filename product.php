@@ -54,9 +54,9 @@
                     <a href="edit_product.php?id=<?php echo (int)$product['id'];?>" class="btn btn-info btn-xs"  title="Edit" data-toggle="tooltip">
                       <span class="glyphicon glyphicon-edit"></span>
                     </a>
-                    <a href="delete_product.php?id=<?php echo (int)$product['id'];?>" class="btn btn-danger btn-xs"  title="Delete" data-toggle="tooltip">
+                    <form method="post" action="delete_product.php?id=<?php echo (int)$product['id']; ?>" style="display:inline"><?php echo csrf_field(); ?><button type="submit" class="btn btn-danger btn-xs"  title="Delete" data-toggle="tooltip">
                       <span class="glyphicon glyphicon-trash"></span>
-                    </a>
+                    </button></form>
                   </div>
                 </td>
               </tr>

@@ -40,6 +40,7 @@
   <div class="col-md-6">
     <?php echo display_msg($msg); ?>
     <form method="post" action="ajax.php" autocomplete="off" id="sug-form">
+<?php echo csrf_field(); ?>
         <div class="form-group">
           <div class="input-group">
             <span class="input-group-btn">
@@ -64,6 +65,7 @@
       </div>
       <div class="panel-body">
         <form method="post" action="add_sale.php">
+<?php echo csrf_field(); ?>
          <table class="table table-bordered">
            <thead>
             <th> Item </th>

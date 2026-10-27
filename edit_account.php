@@ -61,6 +61,7 @@
             </div>
             <div class="col-md-8">
               <form class="form" action="edit_account.php" method="POST" enctype="multipart/form-data">
+<?php echo csrf_field(); ?>
               <div class="form-group">
                 <input type="file" name="file_upload" multiple="multiple" class="btn btn-default btn-file"/>
               </div>
@@ -81,7 +82,8 @@
         <span>Edit My Account</span>
       </div>
       <div class="panel-body">
-          <form method="post" action="edit_account.php?id=<?php echo (int)$user['id'];?>" class="clearfix">
+          <form method="post" action="edit_account.php?id=<?php echo (int)$user['id'];?>
+<?php echo csrf_field(); ?>" class="clearfix">
             <div class="form-group">
                   <label for="name" class="control-label">Name</label>
                   <input type="name" class="form-control" name="name" value="<?php echo remove_junk(ucwords($user['name'])); ?>">

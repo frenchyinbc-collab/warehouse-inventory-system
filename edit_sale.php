@@ -74,7 +74,8 @@ if(!$sale){
          </thead>
            <tbody  id="product_info">
               <tr>
-              <form method="post" action="edit_sale.php?id=<?php echo (int)$sale['id']; ?>">
+              <form method="post" action="edit_sale.php?id=<?php echo (int)$sale['id']; ?>
+<?php echo csrf_field(); ?>">
                 <td id="s_name">
                   <input type="text" class="form-control" id="sug_input" name="title" value="<?php echo remove_junk($product['name']); ?>">
                   <div id="result" class="list-group"></div>

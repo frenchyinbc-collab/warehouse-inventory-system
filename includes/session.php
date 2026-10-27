@@ -56,4 +56,35 @@ class Session {
 $session = new Session();
 $msg = $session->msg();
 
+/*--------------------------------------------------------------*/
+/* CSRF protection: every POST must carry the token that belongs to
+/* the visitor's session (hidden field "csrf_token" or the header
+/* X-CSRF-Token for ajax). Deletions are POST-only, so they are
+/* protected too. A request from another site cannot know the token.
+/*--------------------------------------------------------------*/
+function csrf_token(){
+  if(empty($_SESSION['csrf_token'])){
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  }
+  return $_SESSION['csrf_token'];
+}
+function csrf_field(){
+  return '<input type="hidden" name="csrf_token" value="'.htmlspecialchars(csrf_token(), ENT_QUOTES).'">';
+}
+function csrf_request_is_valid(){
+  $sent = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : (isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '');
+  return is_string($sent) && !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $sent);
+}
+function csrf_require_post(){
+  if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'POST'){
+    http_response_code(405);
+    header('Allow: POST');
+    exit('Method not allowed.');
+  }
+}
+if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_request_is_valid()){
+  http_response_code(403);
+  exit('Invalid or missing security token. Go back, reload the page and try again.');
+}
+
 ?>

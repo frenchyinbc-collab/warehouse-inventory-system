@@ -79,7 +79,8 @@ if(isset($_POST['update-pass'])) {
         </strong>
        </div>
        <div class="panel-body">
-          <form method="post" action="edit_user.php?id=<?php echo (int)$e_user['id'];?>" class="clearfix">
+          <form method="post" action="edit_user.php?id=<?php echo (int)$e_user['id'];?>
+<?php echo csrf_field(); ?>" class="clearfix">
             <div class="form-group">
                   <label for="name" class="control-label">Name</label>
                   <input type="name" class="form-control" name="name" value="<?php echo remove_junk(ucwords($e_user['name'])); ?>">
@@ -120,7 +121,8 @@ if(isset($_POST['update-pass'])) {
         </strong>
       </div>
       <div class="panel-body">
-        <form action="edit_user.php?id=<?php echo (int)$e_user['id'];?>" method="post" class="clearfix">
+        <form action="edit_user.php?id=<?php echo (int)$e_user['id'];?>
+<?php echo csrf_field(); ?>" method="post" class="clearfix">
           <div class="form-group">
                 <label for="password" class="control-label">Password</label>
                 <input type="password" class="form-control" name="password" placeholder="Type user new password">

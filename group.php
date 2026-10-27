@@ -52,9 +52,9 @@
                 <a href="edit_group.php?id=<?php echo (int)$a_group['id'];?>" class="btn btn-xs btn-warning" data-toggle="tooltip" title="Edit">
                   <i class="glyphicon glyphicon-pencil"></i>
                </a>
-                <a href="delete_group.php?id=<?php echo (int)$a_group['id'];?>" class="btn btn-xs btn-danger" data-toggle="tooltip" title="Remove">
+                <form method="post" action="delete_group.php?id=<?php echo (int)$a_group['id']; ?>" style="display:inline"><?php echo csrf_field(); ?><button type="submit" class="btn btn-xs btn-danger" data-toggle="tooltip" title="Remove">
                   <i class="glyphicon glyphicon-remove"></i>
-                </a>
+                </button></form>
                 </div>
            </td>
           </tr>
