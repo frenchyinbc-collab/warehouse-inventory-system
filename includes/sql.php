@@ -78,6 +78,21 @@ function tableExists($table){
       }
   }
  /*--------------------------------------------------------------*/
+ /* After a successful login, replace an old (unsalted SHA1) or
+ /* outdated password hash by a current one. $password is the same
+ /* value that was just verified, so existing accounts keep working.
+/*--------------------------------------------------------------*/
+  function upgrade_password_hash_if_needed($user_id, $password, $stored_hash) {
+    global $db;
+    if(!oswa_password_needs_upgrade($stored_hash)){
+      return false;
+    }
+    $new_hash = $db->escape(oswa_password_hash($password));
+    $id = (int)$user_id;
+    $db->query("UPDATE users SET password='{$new_hash}' WHERE id='{$id}' LIMIT 1");
+    return true;
+  }
+ /*--------------------------------------------------------------*/
  /* Login with the data provided in $_POST,
  /* coming from the login form.
 /*--------------------------------------------------------------*/
@@ -89,8 +104,8 @@ function tableExists($table){
     $result = $db->query($sql);
     if($db->num_rows($result)){
       $user = $db->fetch_assoc($result);
-      $password_request = sha1($password);
-      if($password_request === $user['password'] ){
+      if(oswa_password_verify($password, $user['password'])){
+        upgrade_password_hash_if_needed($user['id'], $password, $user['password']);
         return $user['id'];
       }
     }
@@ -109,8 +124,8 @@ function tableExists($table){
      $result = $db->query($sql);
      if($db->num_rows($result)){
        $user = $db->fetch_assoc($result);
-       $password_request = sha1($password);
-       if($password_request === $user['password'] ){
+       if(oswa_password_verify($password, $user['password'])){
+         upgrade_password_hash_if_needed($user['id'], $password, $user['password']);
          return $user;
        }
      }

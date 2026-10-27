@@ -47,7 +47,7 @@ if(isset($_POST['update-pass'])) {
   if(empty($errors)){
            $id = (int)$e_user['id'];
      $password = remove_junk($db->escape($_POST['password']));
-     $h_pass   = sha1($password);
+     $h_pass   = $db->escape(oswa_password_hash($password));
           $sql = "UPDATE users SET password='{$h_pass}' WHERE id='{$db->escape($id)}'";
        $result = $db->query($sql);
         if($result && $db->affected_rows() === 1){

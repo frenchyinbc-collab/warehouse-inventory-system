@@ -2,6 +2,32 @@
  $errors = array();
 
  /*--------------------------------------------------------------*/
+ /* Password hashing
+ /* New passwords use password_hash() (salted, adaptive). Old
+ /* accounts stored an unsalted SHA1 (40 hex characters): those are
+ /* still accepted at login, to verify them only, and are replaced
+ /* by a modern hash as soon as the user logs in successfully.
+ /*--------------------------------------------------------------*/
+function oswa_password_hash($plain){
+  return password_hash($plain, PASSWORD_DEFAULT);
+}
+function oswa_password_is_legacy($stored){
+  return is_string($stored) && preg_match('/^[0-9a-f]{40}$/', $stored) === 1;
+}
+function oswa_password_verify($plain, $stored){
+  if(!is_string($stored) || $stored === ''){
+    return false;
+  }
+  if(oswa_password_is_legacy($stored)){
+    return hash_equals($stored, sha1($plain));
+  }
+  return password_verify($plain, $stored);
+}
+function oswa_password_needs_upgrade($stored){
+  return oswa_password_is_legacy($stored) || password_needs_rehash($stored, PASSWORD_DEFAULT);
+}
+
+ /*--------------------------------------------------------------*/
  /* Function for Remove escapes special
  /* characters in a string for use in an SQL statement
  /*--------------------------------------------------------------*/
