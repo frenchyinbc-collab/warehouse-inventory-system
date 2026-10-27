@@ -17,14 +17,14 @@
    $req_fields = array('group-name','group-level');
    validate_fields($req_fields);
    if(empty($errors)){
-           $name = remove_junk($db->escape($_POST['group-name']));
-          $level = remove_junk($db->escape($_POST['group-level']));
-         $status = remove_junk($db->escape($_POST['status']));
+           $name = remove_junk($_POST['group-name']);
+          $level = remove_junk($_POST['group-level']);
+         $status = remove_junk($_POST['status']);
 
         $query  = "UPDATE user_groups SET ";
-        $query .= "group_name='{$name}',group_level='{$level}',group_status='{$status}'";
-        $query .= "WHERE ID='{$db->escape($e_group['id'])}'";
-        $result = $db->query($query);
+        $query .= "group_name = ?, group_level = ?, group_status = ? ";
+        $query .= "WHERE ID = ?";
+        $result = $db->execute($query, array($name, $level, $status, (int)$e_group['id']));
          if($result && $db->affected_rows() === 1){
           //sucess
           $session->msg('s',"Group has been updated! ");

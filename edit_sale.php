@@ -18,16 +18,16 @@ if(!$sale){
     $req_fields = array('title','quantity','price','total', 'date' );
     validate_fields($req_fields);
         if(empty($errors)){
-          $p_id      = $db->escape((int)$product['id']);
-          $s_qty     = $db->escape((int)$_POST['quantity']);
-          $s_total   = $db->escape($_POST['total']);
-          $date      = $db->escape($_POST['date']);
+          $p_id      = (int)$product['id'];
+          $s_qty     = (int)$_POST['quantity'];
+          $s_total   = $_POST['total'];
+          $date      = $_POST['date'];
           $s_date    = date("Y-m-d", strtotime($date));
 
           $sql  = "UPDATE sales SET";
-          $sql .= " product_id= '{$p_id}',qty={$s_qty},price='{$s_total}',date='{$s_date}'";
-          $sql .= " WHERE id ='{$sale['id']}'";
-          $result = $db->query($sql);
+          $sql .= " product_id = ?, qty = ?, price = ?, date = ?";
+          $sql .= " WHERE id = ?";
+          $result = $db->execute($sql, array($p_id, $s_qty, $s_total, $s_date, (int)$sale['id']));
           if( $result && $db->affected_rows() === 1){
                     update_product_qty($s_qty,$p_id);
                     $session->msg('s',"Sale updated.");

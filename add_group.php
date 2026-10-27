@@ -18,16 +18,14 @@
      redirect('add_group.php', false);
    }
    if(empty($errors)){
-           $name = remove_junk($db->escape($_POST['group-name']));
-          $level = remove_junk($db->escape($_POST['group-level']));
-         $status = remove_junk($db->escape($_POST['status']));
+           $name = remove_junk($_POST['group-name']);
+          $level = remove_junk($_POST['group-level']);
+         $status = remove_junk($_POST['status']);
 
         $query  = "INSERT INTO user_groups (";
         $query .="group_name,group_level,group_status";
-        $query .=") VALUES (";
-        $query .=" '{$name}', '{$level}','{$status}'";
-        $query .=")";
-        if($db->query($query)){
+        $query .=") VALUES (?, ?, ?)";
+        if($db->execute($query, array($name, $level, $status))){
           //sucess
           $session->msg('s',"Group has been creted! ");
           redirect('add_group.php', false);

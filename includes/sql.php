@@ -8,16 +8,16 @@ function find_all($table) {
    global $db;
    if(tableExists($table))
    {
-     return find_by_sql("SELECT * FROM ".$db->escape($table));
+     return find_by_sql("SELECT * FROM `{$table}`");
    }
 }
 /*--------------------------------------------------------------*/
 /* Function for Perform queries
 /*--------------------------------------------------------------*/
-function find_by_sql($sql)
+function find_by_sql($sql, $params = array())
 {
   global $db;
-  $result = $db->query($sql);
+  $result = $db->execute($sql, $params);
   $result_set = $db->while_loop($result);
  return $result_set;
 }
@@ -29,7 +29,7 @@ function find_by_id($table,$id)
   global $db;
   $id = (int)$id;
     if(tableExists($table)){
-          $sql = $db->query("SELECT * FROM {$db->escape($table)} WHERE id='{$db->escape($id)}' LIMIT 1");
+          $sql = $db->execute("SELECT * FROM `{$table}` WHERE id = ? LIMIT 1", array($id));
           if($result = $db->fetch_assoc($sql))
             return $result;
           else
@@ -44,10 +44,7 @@ function delete_by_id($table,$id)
   global $db;
   if(tableExists($table))
    {
-    $sql = "DELETE FROM ".$db->escape($table);
-    $sql .= " WHERE id=". $db->escape($id);
-    $sql .= " LIMIT 1";
-    $db->query($sql);
+    $db->execute("DELETE FROM `{$table}` WHERE id = ? LIMIT 1", array((int)$id));
     return ($db->affected_rows() === 1) ? true : false;
    }
 }
@@ -59,8 +56,7 @@ function count_by_id($table){
   global $db;
   if(tableExists($table))
   {
-    $sql    = "SELECT COUNT(id) AS total FROM ".$db->escape($table);
-    $result = $db->query($sql);
+    $result = $db->execute("SELECT COUNT(id) AS total FROM `{$table}`");
      return($db->fetch_assoc($result));
   }
 }
@@ -68,15 +64,10 @@ function count_by_id($table){
 /* Determine if database table exists
 /*--------------------------------------------------------------*/
 function tableExists($table){
-  global $db;
-  $table_exit = $db->query('SHOW TABLES FROM '.DB_NAME.' LIKE "'.$db->escape($table).'"');
-      if($table_exit) {
-        if($db->num_rows($table_exit) > 0)
-              return true;
-         else
-              return false;
-      }
-  }
+  // Table names cannot be bound as parameters: only the application's own tables are accepted.
+  static $known = array('users','user_groups','products','categories','sales','media');
+  return is_string($table) && in_array($table, $known, true);
+}
  /*--------------------------------------------------------------*/
  /* After a successful login, replace an old (unsalted SHA1) or
  /* outdated password hash by a current one. $password is the same
@@ -87,9 +78,7 @@ function tableExists($table){
     if(!oswa_password_needs_upgrade($stored_hash)){
       return false;
     }
-    $new_hash = $db->escape(oswa_password_hash($password));
-    $id = (int)$user_id;
-    $db->query("UPDATE users SET password='{$new_hash}' WHERE id='{$id}' LIMIT 1");
+    $db->execute("UPDATE users SET password = ? WHERE id = ? LIMIT 1", array(oswa_password_hash($password), (int)$user_id));
     return true;
   }
  /*--------------------------------------------------------------*/
@@ -98,10 +87,8 @@ function tableExists($table){
 /*--------------------------------------------------------------*/
   function authenticate($username='', $password='') {
     global $db;
-    $username = $db->escape($username);
     $password = $db->escape($password);
-    $sql  = sprintf("SELECT id,username,password,user_level FROM users WHERE username ='%s' LIMIT 1", $username);
-    $result = $db->query($sql);
+    $result = $db->execute("SELECT id,username,password,user_level FROM users WHERE username = ? LIMIT 1", array($username));
     if($db->num_rows($result)){
       $user = $db->fetch_assoc($result);
       if(oswa_password_verify($password, $user['password'])){
@@ -118,10 +105,8 @@ function tableExists($table){
  /*--------------------------------------------------------------*/
    function authenticate_v2($username='', $password='') {
      global $db;
-     $username = $db->escape($username);
      $password = $db->escape($password);
-     $sql  = sprintf("SELECT id,username,password,user_level FROM users WHERE username ='%s' LIMIT 1", $username);
-     $result = $db->query($sql);
+     $result = $db->execute("SELECT id,username,password,user_level FROM users WHERE username = ? LIMIT 1", array($username));
      if($db->num_rows($result)){
        $user = $db->fetch_assoc($result);
        if(oswa_password_verify($password, $user['password'])){
@@ -170,8 +155,7 @@ function tableExists($table){
 	{
 		global $db;
     $date = make_date();
-    $sql = "UPDATE users SET last_login='{$date}' WHERE id ='{$user_id}' LIMIT 1";
-    $result = $db->query($sql);
+    $result = $db->execute("UPDATE users SET last_login = ? WHERE id = ? LIMIT 1", array($date, (int)$user_id));
     return ($result && $db->affected_rows() === 1 ? true : false);
 	}
 
@@ -181,8 +165,7 @@ function tableExists($table){
   function find_by_groupName($val)
   {
     global $db;
-    $sql = "SELECT group_name FROM user_groups WHERE group_name = '{$db->escape($val)}' LIMIT 1 ";
-    $result = $db->query($sql);
+    $result = $db->execute("SELECT group_name FROM user_groups WHERE group_name = ? LIMIT 1", array($val));
     return($db->num_rows($result) === 0 ? true : false);
   }
   /*--------------------------------------------------------------*/
@@ -191,8 +174,7 @@ function tableExists($table){
   function find_by_groupLevel($level)
   {
     global $db;
-    $sql = "SELECT group_level FROM user_groups WHERE group_level = '{$db->escape($level)}' LIMIT 1 ";
-    $result = $db->query($sql);
+    $result = $db->execute("SELECT group_level FROM user_groups WHERE group_level = ? LIMIT 1", array($level));
     return($db->num_rows($result) === 0 ? true : false);
   }
   /*--------------------------------------------------------------*/
@@ -241,9 +223,8 @@ function tableExists($table){
 
    function find_product_by_title($product_name){
      global $db;
-     $p_name = remove_junk($db->escape($product_name));
-     $sql = "SELECT name FROM products WHERE name like '%$p_name%' LIMIT 5";
-     $result = find_by_sql($sql);
+     $p_name = remove_junk($product_name);
+     $result = find_by_sql("SELECT name FROM products WHERE name like ? LIMIT 5", array("%{$p_name}%"));
      return $result;
    }
 
@@ -253,10 +234,7 @@ function tableExists($table){
   /*--------------------------------------------------------------*/
   function find_all_product_info_by_title($title){
     global $db;
-    $sql  = "SELECT * FROM products ";
-    $sql .= " WHERE name ='{$title}'";
-    $sql .=" LIMIT 1";
-    return find_by_sql($sql);
+    return find_by_sql("SELECT * FROM products WHERE name = ? LIMIT 1", array($title));
   }
 
   /*--------------------------------------------------------------*/
@@ -266,8 +244,7 @@ function tableExists($table){
     global $db;
     $qty = (int) $qty;
     $id  = (int)$p_id;
-    $sql = "UPDATE products SET quantity=quantity -'{$qty}' WHERE id = '{$id}'";
-    $result = $db->query($sql);
+    $result = $db->execute("UPDATE products SET quantity = quantity - ? WHERE id = ?", array($qty, $id));
     return($db->affected_rows() === 1 ? true : false);
 
   }
@@ -280,7 +257,7 @@ function tableExists($table){
    $sql  .= "m.file_name AS image FROM products p";
    $sql  .= " LEFT JOIN categories c ON c.id = p.categorie_id";
    $sql  .= " LEFT JOIN media m ON m.id = p.media_id";
-   $sql  .= " ORDER BY p.id DESC LIMIT ".$db->escape((int)$limit);
+   $sql  .= " ORDER BY p.id DESC LIMIT ".(int)$limit;
    return find_by_sql($sql);
  }
  /*--------------------------------------------------------------*/
@@ -292,7 +269,7 @@ function tableExists($table){
    $sql .= " FROM sales s";
    $sql .= " LEFT JOIN products p ON p.id = s.product_id ";
    $sql .= " GROUP BY s.product_id";
-   $sql .= " ORDER BY SUM(s.qty) DESC LIMIT ".$db->escape((int)$limit);
+   $sql .= " ORDER BY SUM(s.qty) DESC LIMIT ".(int)$limit;
    return $db->query($sql);
  }
  /*--------------------------------------------------------------*/
@@ -314,7 +291,7 @@ function find_recent_sale_added($limit){
   $sql  = "SELECT s.id,s.qty,s.price,s.date,p.name";
   $sql .= " FROM sales s";
   $sql .= " LEFT JOIN products p ON s.product_id = p.id";
-  $sql .= " ORDER BY s.date DESC LIMIT ".$db->escape((int)$limit);
+  $sql .= " ORDER BY s.date DESC LIMIT ".(int)$limit;
   return find_by_sql($sql);
 }
 /*--------------------------------------------------------------*/
@@ -331,10 +308,10 @@ function find_sale_by_dates($start_date,$end_date){
   $sql .= "SUM(p.buy_price * s.qty) AS total_buying_price ";
   $sql .= "FROM sales s ";
   $sql .= "LEFT JOIN products p ON s.product_id = p.id";
-  $sql .= " WHERE s.date BETWEEN '{$start_date}' AND '{$end_date}'";
+  $sql .= " WHERE s.date BETWEEN ? AND ?";
   $sql .= " GROUP BY DATE(s.date),p.name";
   $sql .= " ORDER BY DATE(s.date) DESC";
-  return $db->query($sql);
+  return $db->execute($sql, array($start_date, $end_date));
 }
 /*--------------------------------------------------------------*/
 /* Function for Generate Daily sales report
@@ -346,9 +323,9 @@ function  dailySales($year,$month){
   $sql .= "SUM(p.sale_price * s.qty) AS total_saleing_price";
   $sql .= " FROM sales s";
   $sql .= " LEFT JOIN products p ON s.product_id = p.id";
-  $sql .= " WHERE DATE_FORMAT(s.date, '%Y-%m' ) = '{$year}-{$month}'";
+  $sql .= " WHERE DATE_FORMAT(s.date, '%Y-%m' ) = ?";
   $sql .= " GROUP BY DATE_FORMAT( s.date,  '%e' ),s.product_id";
-  return find_by_sql($sql);
+  return find_by_sql($sql, array("{$year}-{$month}"));
 }
 /*--------------------------------------------------------------*/
 /* Function for Generate Monthly sales report
@@ -360,10 +337,10 @@ function  monthlySales($year){
   $sql .= "SUM(p.sale_price * s.qty) AS total_saleing_price";
   $sql .= " FROM sales s";
   $sql .= " LEFT JOIN products p ON s.product_id = p.id";
-  $sql .= " WHERE DATE_FORMAT(s.date, '%Y' ) = '{$year}'";
+  $sql .= " WHERE DATE_FORMAT(s.date, '%Y' ) = ?";
   $sql .= " GROUP BY DATE_FORMAT( s.date,  '%c' ),s.product_id";
   $sql .= " ORDER BY date_format(s.date, '%c' ) ASC";
-  return find_by_sql($sql);
+  return find_by_sql($sql, array((string)$year));
 }
 
 ?>

@@ -10,11 +10,11 @@
  if(isset($_POST['add_cat'])){
    $req_field = array('categorie-name');
    validate_fields($req_field);
-   $cat_name = remove_junk($db->escape($_POST['categorie-name']));
+   $cat_name = remove_junk($_POST['categorie-name']);
    if(empty($errors)){
       $sql  = "INSERT INTO categories (name)";
-      $sql .= " VALUES ('{$cat_name}')";
-      if($db->query($sql)){
+      $sql .= " VALUES (?)";
+      if($db->execute($sql, array($cat_name))){
         $session->msg("s", "Successfully Added Categorie");
         redirect('categorie.php',false);
       } else {

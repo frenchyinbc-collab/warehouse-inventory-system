@@ -11,24 +11,22 @@
    $req_fields = array('product-title','product-categorie','product-quantity','buying-price', 'saleing-price' );
    validate_fields($req_fields);
    if(empty($errors)){
-     $p_name  = remove_junk($db->escape($_POST['product-title']));
-     $p_cat   = remove_junk($db->escape($_POST['product-categorie']));
-     $p_qty   = remove_junk($db->escape($_POST['product-quantity']));
-     $p_buy   = remove_junk($db->escape($_POST['buying-price']));
-     $p_sale  = remove_junk($db->escape($_POST['saleing-price']));
+     $p_name  = remove_junk($_POST['product-title']);
+     $p_cat   = remove_junk($_POST['product-categorie']);
+     $p_qty   = remove_junk($_POST['product-quantity']);
+     $p_buy   = remove_junk($_POST['buying-price']);
+     $p_sale  = remove_junk($_POST['saleing-price']);
      if (is_null($_POST['product-photo']) || $_POST['product-photo'] === "") {
        $media_id = '0';
      } else {
-       $media_id = remove_junk($db->escape($_POST['product-photo']));
+       $media_id = remove_junk($_POST['product-photo']);
      }
      $date    = make_date();
      $query  = "INSERT INTO products (";
      $query .=" name,quantity,buy_price,sale_price,categorie_id,media_id,date";
-     $query .=") VALUES (";
-     $query .=" '{$p_name}', '{$p_qty}', '{$p_buy}', '{$p_sale}', '{$p_cat}', '{$media_id}', '{$date}'";
-     $query .=")";
-     $query .=" ON DUPLICATE KEY UPDATE name='{$p_name}'";
-     if($db->query($query)){
+     $query .=") VALUES (?, ?, ?, ?, ?, ?, ?)";
+     $query .=" ON DUPLICATE KEY UPDATE name = ?";
+     if($db->execute($query, array($p_name, $p_qty, $p_buy, $p_sale, $p_cat, $media_id, $date, $p_name))){
        $session->msg('s',"Product added ");
        redirect('add_product.php', false);
      } else {

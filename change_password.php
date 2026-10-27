@@ -25,9 +25,8 @@
             }
 
             $id = (int)$_POST['id'];
-            $new = $db->escape(oswa_password_hash($_POST['new-password']));
-            $sql = "UPDATE users SET password ='{$new}' WHERE id='{$db->escape($id)}'";
-            $result = $db->query($sql);
+            $new = oswa_password_hash($_POST['new-password']);
+            $result = $db->execute("UPDATE users SET password = ? WHERE id = ?", array($new, $id));
                 if($result && $db->affected_rows() === 1):
                   $session->logout();
                   $session->msg('s',"Login with your new password.");

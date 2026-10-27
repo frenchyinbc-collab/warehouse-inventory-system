@@ -25,10 +25,9 @@
     validate_fields($req_fields);
     if(empty($errors)){
              $id = (int)$_SESSION['user_id'];
-           $name = remove_junk($db->escape($_POST['name']));
-       $username = remove_junk($db->escape($_POST['username']));
-            $sql = "UPDATE users SET name ='{$name}', username ='{$username}' WHERE id='{$id}'";
-    $result = $db->query($sql);
+           $name = remove_junk($_POST['name']);
+       $username = remove_junk($_POST['username']);
+    $result = $db->execute("UPDATE users SET name = ?, username = ? WHERE id = ?", array($name, $username, $id));
           if($result && $db->affected_rows() === 1){
             $session->msg('s',"Acount updated ");
             redirect('edit_account.php', false);

@@ -5,6 +5,7 @@ class MySqli_DB {
 
     private $con;
     public $query_id;
+    private $affected = -1;
 
     function __construct() {
       $this->db_connect();
@@ -15,6 +16,8 @@ class MySqli_DB {
 /*--------------------------------------------------------------*/
 public function db_connect()
 {
+  // Report errors as return values (handled by fail(), which logs them) instead of uncaught exceptions.
+  mysqli_report(MYSQLI_REPORT_OFF);
   $this->con = mysqli_connect(DB_HOST,DB_USER,DB_PASS);
   if(!$this->con)
          {
@@ -44,18 +47,54 @@ public function db_disconnect()
 /*--------------------------------------------------------------*/
 public function query($sql)
    {
-
-      if (trim($sql != "")) {
+      $this->affected = -1;
+      if (trim($sql) != "") {
           $this->query_id = $this->con->query($sql);
       }
-      if (!$this->query_id)
-        // only for Develope mode
-              die("Error on this Query :<pre> " . $sql ."</pre>");
-       // For production mode
-        //  die("Error on Query");
+      if (!$this->query_id) {
+          $this->fail($this->con->error);
+      }
+      return $this->query_id;
+   }
 
-       return $this->query_id;
+/*--------------------------------------------------------------*/
+/* Prepared statement: values are sent separately from the SQL text
+/* (use ? placeholders). Returns a result set for SELECT, true for
+/* INSERT/UPDATE/DELETE. $params are bound as integers when they are
+/* PHP ints, otherwise as strings (same conversions MySQL applied to
+/* the old quoted literals).
+/*--------------------------------------------------------------*/
+public function execute($sql, $params = array())
+   {
+      $stmt = $this->con->prepare($sql);
+      if (!$stmt) {
+          $this->fail($this->con->error);
+      }
+      if (!empty($params)) {
+          $types = '';
+          foreach ($params as $p) {
+              $types .= is_int($p) ? 'i' : 's';
+          }
+          $stmt->bind_param($types, ...array_values($params));
+      }
+      if (!$stmt->execute()) {
+          $this->fail($stmt->error);
+      }
+      $result = $stmt->get_result();
+      $this->affected = $stmt->affected_rows;
+      $stmt->close();
+      $this->query_id = ($result === false) ? true : $result;
+      return $this->query_id;
+   }
 
+/* Never show SQL or driver errors to the visitor: log them instead. */
+private function fail($detail)
+   {
+      error_log('OSWA-INV database error: ' . $detail);
+      if (PHP_SAPI !== 'cli' && !headers_sent()) {
+          http_response_code(500);
+      }
+      die('A database error occurred.');
    }
 
 /*--------------------------------------------------------------*/
@@ -83,7 +122,7 @@ public function insert_id()
 }
 public function affected_rows()
 {
-  return mysqli_affected_rows($this->con);
+  return $this->affected >= 0 ? $this->affected : mysqli_affected_rows($this->con);
 }
 /*--------------------------------------------------------------*/
  /* Function for Remove escapes special

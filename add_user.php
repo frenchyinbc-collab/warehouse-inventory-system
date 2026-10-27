@@ -17,17 +17,15 @@
          $session->msg('d', $policy_error);
          redirect('add_user.php', false);
        }
-           $name   = remove_junk($db->escape($_POST['full-name']));
-       $username   = remove_junk($db->escape($_POST['username']));
+           $name   = remove_junk($_POST['full-name']);
+       $username   = remove_junk($_POST['username']);
        $password   = remove_junk($db->escape($_POST['password']));
-       $user_level = (int)$db->escape($_POST['level']);
-       $password = $db->escape(oswa_password_hash($password));
+       $user_level = (int)$_POST['level'];
+       $password = oswa_password_hash($password);
         $query = "INSERT INTO users (";
         $query .="name,username,password,user_level,status";
-        $query .=") VALUES (";
-        $query .=" '{$name}', '{$username}', '{$password}', '{$user_level}','1'";
-        $query .=")";
-        if($db->query($query)){
+        $query .=") VALUES (?, ?, ?, ?, '1')";
+        if($db->execute($query, array($name, $username, $password, $user_level))){
           //sucess
           $session->msg('s',"User account has been creted! ");
           redirect('add_user.php', false);

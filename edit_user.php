@@ -20,12 +20,11 @@
     validate_fields($req_fields);
     if(empty($errors)){
              $id = (int)$e_user['id'];
-           $name = remove_junk($db->escape($_POST['name']));
-       $username = remove_junk($db->escape($_POST['username']));
-          $level = (int)$db->escape($_POST['level']);
-       $status   = remove_junk($db->escape($_POST['status']));
-            $sql = "UPDATE users SET name ='{$name}', username ='{$username}',user_level='{$level}',status='{$status}' WHERE id='{$db->escape($id)}'";
-         $result = $db->query($sql);
+           $name = remove_junk($_POST['name']);
+       $username = remove_junk($_POST['username']);
+          $level = (int)$_POST['level'];
+       $status   = remove_junk($_POST['status']);
+         $result = $db->execute("UPDATE users SET name = ?, username = ?, user_level = ?, status = ? WHERE id = ?", array($name, $username, $level, $status, $id));
           if($result && $db->affected_rows() === 1){
             $session->msg('s',"Acount Updated ");
             redirect('edit_user.php?id='.(int)$e_user['id'], false);
@@ -52,9 +51,8 @@ if(isset($_POST['update-pass'])) {
      }
            $id = (int)$e_user['id'];
      $password = remove_junk($db->escape($_POST['password']));
-     $h_pass   = $db->escape(oswa_password_hash($password));
-          $sql = "UPDATE users SET password='{$h_pass}' WHERE id='{$db->escape($id)}'";
-       $result = $db->query($sql);
+     $h_pass   = oswa_password_hash($password);
+       $result = $db->execute("UPDATE users SET password = ? WHERE id = ?", array($h_pass, $id));
         if($result && $db->affected_rows() === 1){
           $session->msg('s',"User password has been updated ");
           redirect('edit_user.php?id='.(int)$e_user['id'], false);

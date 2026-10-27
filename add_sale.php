@@ -10,19 +10,17 @@
     $req_fields = array('s_id','quantity','price','total', 'date' );
     validate_fields($req_fields);
         if(empty($errors)){
-          $p_id      = $db->escape((int)$_POST['s_id']);
-          $s_qty     = $db->escape((int)$_POST['quantity']);
-          $s_total   = $db->escape($_POST['total']);
-          $date      = $db->escape($_POST['date']);
+          $p_id      = (int)$_POST['s_id'];
+          $s_qty     = (int)$_POST['quantity'];
+          $s_total   = $_POST['total'];
+          $date      = $_POST['date'];
           $s_date    = make_date();
 
           $sql  = "INSERT INTO sales (";
           $sql .= " product_id,qty,price,date";
-          $sql .= ") VALUES (";
-          $sql .= "'{$p_id}','{$s_qty}','{$s_total}','{$s_date}'";
-          $sql .= ")";
+          $sql .= ") VALUES (?, ?, ?, ?)";
 
-                if($db->query($sql)){
+                if($db->execute($sql, array($p_id, $s_qty, $s_total, $s_date))){
                   update_product_qty($s_qty,$p_id);
                   $session->msg('s',"Sale added. ");
                   redirect('add_sale.php', false);

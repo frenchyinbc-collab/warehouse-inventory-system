@@ -11,8 +11,8 @@ $results = '';
     validate_fields($req_dates);
 
     if(empty($errors)):
-      $start_date   = remove_junk($db->escape($_POST['start-date']));
-      $end_date     = remove_junk($db->escape($_POST['end-date']));
+      $start_date   = remove_junk($_POST['start-date']);
+      $end_date     = remove_junk($_POST['end-date']);
       $results      = find_sale_by_dates($start_date,$end_date);
     else:
       $session->msg("d", $errors);

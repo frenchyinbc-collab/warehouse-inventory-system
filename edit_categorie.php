@@ -17,11 +17,9 @@
 if(isset($_POST['edit_cat'])){
   $req_field = array('categorie-name');
   validate_fields($req_field);
-  $cat_name = remove_junk($db->escape($_POST['categorie-name']));
+  $cat_name = remove_junk($_POST['categorie-name']);
   if(empty($errors)){
-        $sql = "UPDATE categories SET name='{$cat_name}'";
-       $sql .= " WHERE id='{$categorie['id']}'";
-     $result = $db->query($sql);
+     $result = $db->execute("UPDATE categories SET name = ? WHERE id = ?", array($cat_name, (int)$categorie['id']));
      if($result && $db->affected_rows() === 1) {
        $session->msg("s", "Successfully updated Categorie");
        redirect('categorie.php',false);

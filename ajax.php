@@ -30,7 +30,7 @@
  // find all product
   if(isset($_POST['p_name']) && strlen($_POST['p_name']))
   {
-    $product_title = remove_junk($db->escape($_POST['p_name']));
+    $product_title = remove_junk($_POST['p_name']);
     if($results = find_all_product_info_by_title($product_title)){
         foreach ($results as $result) {
 
