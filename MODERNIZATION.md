@@ -14,9 +14,9 @@ Method: a characterization test suite was written first against the **original**
 | | Default accounts | admin/admin, special/special, user/user | none; first admin created at install |
 | | Password storage | unsalted SHA1 (identical passwords = identical hashes) | `password_hash` (bcrypt, salted); old SHA1 accounts upgraded at first login |
 | | Minimum password length | none (1 character accepted) | 8 |
-| | SQL queries built with text | ~60 places with manual escaping | 0: prepared statements (table names via allow-list) |
+| | SQL queries built with text | ~95 call sites with manual escaping | 0: prepared statements (table names via allow-list) |
 | | Database errors | SQL text in the error path | generic message, details in the server log |
-| | CSRF | none; a link on another site could delete data | token on all 20 forms + ajax; deletions POST-only |
+| | CSRF | none; a link on another site could delete data | token on all 25 forms + ajax; deletions POST-only |
 | | Session cookie | no HttpOnly / SameSite | HttpOnly, SameSite=Lax, Secure over HTTPS |
 | | Session fixation | session id kept at login | new id at login and logout |
 | Compatibility | PHP warnings/deprecations during the 122 `keep` tests (E_ALL) | 425 | 0 |
