@@ -23,7 +23,7 @@ If you find any bug, and a fix for that bug, please leave a comment on the githu
 
 2. Import/load oswa_inv.sql into your mysql database. This should set up the basic structure of the database system.
 
-3. Modify the includes/config.php and change the variables to match your host, database, username and passwords.
+3. Set the database settings as environment variables of your web server / PHP process (nothing is stored in the code any more): `OSWA_DB_USER` and `OSWA_DB_PASS` are required, `OSWA_DB_HOST` (default `localhost`) and `OSWA_DB_NAME` (default `oswa_inv`) are optional. Example for a local test: `OSWA_DB_USER=myuser OSWA_DB_PASS=mypassword php -S 127.0.0.1:8080`. Without them the app stops with a clear "Configuration error" message.
 
 4. Change all Folder permission inside uploads folder either add them to group call `www` if available or `777`.
 
