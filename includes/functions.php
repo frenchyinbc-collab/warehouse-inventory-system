@@ -70,7 +70,7 @@ function first_character($str){
 function validate_fields($var){
   global $errors;
   foreach ($var as $field) {
-    $val = remove_junk($_POST[$field]);
+    $val = remove_junk(isset($_POST[$field]) ? $_POST[$field] : '');
     if(isset($val) && $val==''){
       $errors = $field ." can't be blank.";
       return $errors;
@@ -113,6 +113,7 @@ function redirect($url, $permanent = false)
 function total_price($totals){
    $sum = 0;
    $sub = 0;
+   $profit = 0;
    foreach($totals as $total ){
      $sum += $total['total_saleing_price'];
      $sub += $total['total_buying_price'];
@@ -133,7 +134,7 @@ function read_date($str){
 /* Function for  Readable Make date time
 /*--------------------------------------------------------------*/
 function make_date(){
-  return strftime("%Y-%m-%d %H:%M:%S", time());
+  return date("Y-m-d H:i:s", time());
 }
 /*--------------------------------------------------------------*/
 /* Function for  Readable date time
@@ -151,7 +152,7 @@ function randString($length = 5)
   $cha = "0123456789abcdefghijklmnopqrstuvwxyz";
 
   for($x=0; $x<$length; $x++)
-   $str .= $cha[mt_rand(0,strlen($cha))];
+   $str .= $cha[mt_rand(0,strlen($cha)-1)];
   return $str;
 }
 

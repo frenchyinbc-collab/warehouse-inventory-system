@@ -178,20 +178,30 @@ function tableExists($table){
     return($db->num_rows($result) === 0 ? true : false);
   }
   /*--------------------------------------------------------------*/
+  /* True when the user's group exists and has been deactivated
+  /*--------------------------------------------------------------*/
+  function user_group_is_deactivated($level)
+  {
+    global $db;
+    $result = $db->execute("SELECT group_status FROM user_groups WHERE group_level = ? LIMIT 1", array($level));
+    $group = $db->fetch_assoc($result);
+    return ($group && (string)$group['group_status'] === '0');
+  }
+  /*--------------------------------------------------------------*/
   /* Function for cheaking which user level has access to page
   /*--------------------------------------------------------------*/
    function page_require_level($require_level){
      global $session;
      $current_user = current_user();
-     $login_level = find_by_groupLevel($current_user['user_level']);
      //if user not login
-     if (!$session->isUserLoggedIn(true)):
+     if (!$session->isUserLoggedIn(true) || !$current_user):
             $session->msg('d','Please login...');
             redirect('index.php', false);
       //if Group status Deactive
-     elseif($login_level['group_status'] === '0'):
+     elseif(user_group_is_deactivated($current_user['user_level'])):
+           $session->logout();  // redirecting a blocked user to home.php would loop forever
            $session->msg('d','This level user has been band!');
-           redirect('home.php',false);
+           redirect('index.php',false);
       //cheackin log in User level and Require level is Less than or equal to
      elseif($current_user['user_level'] <= (int)$require_level):
               return true;
