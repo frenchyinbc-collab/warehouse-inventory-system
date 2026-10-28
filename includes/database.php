@@ -1,6 +1,32 @@
 <?php
 require_once(LIB_PATH_INC.DS."config.php");
 
+/*--------------------------------------------------------------*/
+/* Result set of a prepared statement. mysqli returns real integers
+/* for prepared statements, while the application (like the original
+/* text-protocol queries) compares values with strings ('1', '0'...).
+/* Values are therefore converted to strings, exactly as before.
+/*--------------------------------------------------------------*/
+class OswaResult implements IteratorAggregate {
+    public $rows = array();
+    public $pos = 0;
+    function __construct($mysqli_result) {
+        while ($row = $mysqli_result->fetch_assoc()) {
+            foreach ($row as $k => $v) {
+                if ($v !== null && !is_string($v)) { $row[$k] = (string)$v; }
+            }
+            $this->rows[] = $row;
+        }
+        $mysqli_result->free();
+    }
+    function getIterator(): Iterator {
+        return new ArrayIterator($this->rows);
+    }
+    function next_assoc() {
+        return ($this->pos < count($this->rows)) ? $this->rows[$this->pos++] : null;
+    }
+}
+
 class MySqli_DB {
 
     private $con;
@@ -83,7 +109,7 @@ public function execute($sql, $params = array())
       $result = $stmt->get_result();
       $this->affected = $stmt->affected_rows;
       $stmt->close();
-      $this->query_id = ($result === false) ? true : $result;
+      $this->query_id = ($result === false) ? true : new OswaResult($result);
       return $this->query_id;
    }
 
@@ -102,18 +128,32 @@ private function fail($detail)
 /*--------------------------------------------------------------*/
 public function fetch_array($statement)
 {
+  if ($statement instanceof OswaResult) {
+    $row = $statement->next_assoc();
+    return ($row === null) ? null : array_merge(array_values($row), $row);
+  }
   return mysqli_fetch_array($statement);
 }
 public function fetch_object($statement)
 {
+  if ($statement instanceof OswaResult) {
+    $row = $statement->next_assoc();
+    return ($row === null) ? null : (object)$row;
+  }
   return mysqli_fetch_object($statement);
 }
 public function fetch_assoc($statement)
 {
+  if ($statement instanceof OswaResult) {
+    return $statement->next_assoc();
+  }
   return mysqli_fetch_assoc($statement);
 }
 public function num_rows($statement)
 {
+  if ($statement instanceof OswaResult) {
+    return count($statement->rows);
+  }
   return mysqli_num_rows($statement);
 }
 public function insert_id()
